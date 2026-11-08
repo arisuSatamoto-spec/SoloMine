@@ -1,6 +1,6 @@
 # SoloMine
 
-**Self-hosted Bitcoin solo mining based on CKPool — experimental build, Regtest validated.**
+**Self-hosted Bitcoin solo mining based on CKPool — Regtest validated.**
 
 SoloMine is an independent, unofficial project based on [CKPool](https://github.com/ckolivas/ckpool). It does not require a connection to a hosted SoloMine server. The source repository contains a reproducible build helper that fetches a pinned upstream CKPool revision and applies the SoloMine changes.
 
@@ -32,7 +32,7 @@ cd SoloMine
 bash scripts/build-from-upstream.sh bef6dd2efa2ed803d77fb49fbc064666685cb742
 ```
 
-This builds into `build/ckpool/src/ckpool`. **Do not use this experimental build on mainnet yet.** The build script does not provide a Bitcoin Core node or configure its RPC credentials. Protect RPC cookies/passwords, bind test Stratum to loopback, and keep regtest configuration separate from mainnet.
+This builds into `build/ckpool/src/ckpool`. **Mainnet deployment has not yet been validated.** The build script does not provide a Bitcoin Core node or configure its RPC credentials. Protect RPC cookies/passwords, bind test Stratum to loopback, and keep regtest configuration separate from mainnet.
 
 ## Mainnet release gates
 
