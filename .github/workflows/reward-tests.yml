@@ -1,0 +1,17 @@
+name: Reference reward arithmetic
+on:
+  push:
+  pull_request:
+jobs:
+  fee-math:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python reference tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: C reward arithmetic tests
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror -I src/solomine tests/c/test_reward_split.c -o /tmp/solomine-fee-test
+          /tmp/solomine-fee-test
+      - name: Patch script syntax
+        run: python3 -m py_compile scripts/apply-fee-patch.py
