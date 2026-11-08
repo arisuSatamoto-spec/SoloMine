@@ -4,6 +4,7 @@
 This is NOT a substitute for a successful build and Bitcoin Core regtest.
 """
 from pathlib import Path
+import re
 import sys
 
 ROOT = Path(sys.argv[1]).resolve() if len(sys.argv) == 2 else Path.cwd()
@@ -39,6 +40,49 @@ def main() -> None:
         'double dbl64 = (double)g64 / 100 * ckpool.donation;\n\n\t\td64 = dbl64;',
         '/* Fixed 2% fee, integer satoshis, round down. */\n\t\td64 = g64 / 50;',
         "integer fee calculation")
+
+    # Enforce fee availability before coinbase construction.
+    marker = re.compile(r'(?m)^([ \\t]*)// Generation value
+    ck.write_text(ck_src)
+    st.write_text(st_src)
+    print("SoloMine patch applied. Full build and regtest still required.")
+
+if __name__ == "__main__":
+    main()
+)
+    matches = list(marker.finditer(st_src))
+    if len(matches) != 1:
+        raise RuntimeError(f"fee guard: expected one marker, found {len(matches)}")
+    m = matches[0]
+    indent = m.group(1)
+    lines = [
+        '/* SoloMine: validate fee before building coinbase. */',
+        'if (!ckpool.donvalid || ckpool.donation != 2.0 ||',
+        '    !sdata->dontxnlen) {',
+        '    LOGEMERG("SoloMine: developer fee unavailable");',
+        '    abort();',
+        '}',
+        '',
+    ]
+    guard = '\\n'.join(indent + line if line else '' for line in lines) + '\\n'
+    st_src = st_src[:m.start()] + guard + st_src[m.start():]
+
+    # Reject startup when the developer address is invalid.
+    invalid = re.compile(
+        r'(?m)^([ \\t]*)} else\\n[ \\t]*LOGNOTICE\\("No valid donation address found"\\);'
+    )
+    matches = list(invalid.finditer(st_src))
+    if len(matches) != 1:
+        raise RuntimeError(f"invalid developer address: expected one match, found {len(matches)}")
+    m = matches[0]
+    indent = m.group(1)
+    replacement = (
+        indent + '} else {\\n' +
+        indent + '\\tLOGEMERG("SoloMine: developer fee address validation failed; refusing to mine without the fixed 2 percent fee");\\n' +
+        indent + '\\texit(1);\\n' +
+        indent + '}'
+    )
+    st_src = st_src[:m.start()] + replacement + st_src[m.end():]
 
     # Only write if all source patterns were verified first.
     ck.write_text(ck_src)
