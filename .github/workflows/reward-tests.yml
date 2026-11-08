@@ -1,4 +1,4 @@
-name: Reference reward arithmetic
+name: SoloMine source checks
 on:
   push:
   pull_request:
@@ -15,3 +15,18 @@ jobs:
           /tmp/solomine-fee-test
       - name: Patch script syntax
         run: python3 -m py_compile scripts/apply-fee-patch.py
+  upstream-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned upstream CKPool
+        run: |
+          git clone https://github.com/ckolivas/ckpool.git /tmp/ckpool-upstream
+          git -C /tmp/ckpool-upstream checkout --detach bef6dd2efa2ed803d77fb49fbc064666685cb742
+      - name: Apply SoloMine patch (fails if upstream differs)
+        run: python3 scripts/apply-fee-patch.py /tmp/ckpool-upstream
+      - name: Check fee and payout address in source
+        run: |
+          grep -F 'ckpool.donation = 2.0;' /tmp/ckpool-upstream/src/ckpool.c
+          grep -F 'bc1qtqwusq7fld4y7jsrwfckalmrjpgfg0tv5rfncl' /tmp/ckpool-upstream/src/ckpool.c
+          grep -F 'd64 = (g64 / 50)' /tmp/ckpool-upstream/src/stratifier.c
