@@ -22,6 +22,10 @@ replace_once(ck,
     '/* SoloMine official build: fee is not configurable via JSON. */\n\tckpool.donation = 2.0;')
 
 replace_once(ck,
+    'parse_config();\\n\\t/* Set defaults if not found in config file */',
+    'parse_config();\\n\\t/* SoloMine official distribution supports solo mining only. */\\n\\tif (!ckpool.btcsolo)\\n\\t\\tquit(0, "SoloMine requires Bitcoin solo mode (-B)");\\n\\t/* Set defaults if not found in config file */')
+
+replace_once(ck,
     'ckpool.donaddress = "bc1q28kkr5hk4gnqe3evma6runjrd2pvqyp8fpwfzu";',
     'ckpool.donaddress = "bc1qtqwusq7fld4y7jsrwfckalmrjpgfg0tv5rfncl";')
 
