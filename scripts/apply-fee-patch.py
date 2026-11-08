@@ -42,7 +42,7 @@ def main() -> None:
         "integer fee calculation")
 
     # Enforce fee availability before coinbase construction.
-    marker = re.compile(r'(?m)^([ \\t]*)// Generation value
+    marker = re.compile(r'(?m)^([ \t]*)// Generation value
     ck.write_text(ck_src)
     st.write_text(st_src)
     print("SoloMine patch applied. Full build and regtest still required.")
@@ -64,12 +64,12 @@ if __name__ == "__main__":
         '}',
         '',
     ]
-    guard = '\\n'.join(indent + line if line else '' for line in lines) + '\\n'
+    guard = '\n'.join(indent + line if line else '' for line in lines) + '\n'
     st_src = st_src[:m.start()] + guard + st_src[m.start():]
 
     # Reject startup when the developer address is invalid.
     invalid = re.compile(
-        r'(?m)^([ \\t]*)} else\\n[ \\t]*LOGNOTICE\\("No valid donation address found"\\);'
+        r'(?m)^([ \t]*)} else\n[ \t]*LOGNOTICE\("No valid donation address found"\);'
     )
     matches = list(invalid.finditer(st_src))
     if len(matches) != 1:
@@ -77,9 +77,9 @@ if __name__ == "__main__":
     m = matches[0]
     indent = m.group(1)
     replacement = (
-        indent + '} else {\\n' +
-        indent + '\\tLOGEMERG("SoloMine: developer fee address validation failed; refusing to mine without the fixed 2 percent fee");\\n' +
-        indent + '\\texit(1);\\n' +
+        indent + '} else {\n' +
+        indent + '\tLOGEMERG("SoloMine: developer fee address validation failed; refusing to mine without the fixed 2 percent fee");\n' +
+        indent + '\texit(1);\n' +
         indent + '}'
     )
     st_src = st_src[:m.start()] + replacement + st_src[m.end():]
